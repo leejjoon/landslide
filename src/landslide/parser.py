@@ -107,5 +107,5 @@ def take_out_div(html):
 
     soup.contents[0:1] = soup.contents[0].contents
 
-    html = soup.prettify()
+    html = unicode(soup) #.prettify()
     return html
