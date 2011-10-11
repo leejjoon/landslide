@@ -31,8 +31,8 @@ class Parser(object):
        syntaxes.
     """
     RST_REPLACEMENTS = [
-            (r'<div.*?>', r'', re.UNICODE),
-            (r'</div>', r'', re.UNICODE),
+            #(r'<div.*?>', r'', re.UNICODE),
+            #(r'</div>', r'', re.UNICODE),
             (r'<p class="system-message-\w+">.*?</p>', r'', re.UNICODE),
             (r'Document or section may not begin with a transition\.',
              r'', re.UNICODE),
@@ -78,6 +78,8 @@ class Parser(object):
             # RST generates pretty much markup to be removed in our case
             for (pattern, replacement, mode) in self.RST_REPLACEMENTS:
                 html = re.sub(re.compile(pattern, mode), replacement, html, 0)
+
+            html = take_out_div(html)
             return html.strip()
         elif self.format == 'textile':
             try:
@@ -89,3 +91,21 @@ class Parser(object):
         else:
             raise NotImplementedError(u"Unsupported format %s, cannot parse"
                                       % self.format)
+
+def take_out_div(html):
+    from BeautifulSoup import BeautifulSoup
+
+    soup = BeautifulSoup(html)
+    parent = soup.contents[0]
+    for p in parent.findAll("div", {"class": "section"}):
+        if u"container" in p[u"class"]:
+            pass
+        else:
+            pp = parent
+            i = pp.index(p)
+            pp.contents[i:i+1] = p.contents
+
+    soup.contents[0:1] = soup.contents[0].contents
+
+    html = soup.prettify()
+    return html
