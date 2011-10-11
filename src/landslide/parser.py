@@ -93,19 +93,29 @@ class Parser(object):
                                       % self.format)
 
 def take_out_div(html):
+    """
+    This function try to remove <div> </div> whose class do not
+    have "container".
+    """
+
+    # I'm not an expert on this, and not sure if this is correct way,
+    # anyhow seems to work.
+
     from BeautifulSoup import BeautifulSoup
 
     soup = BeautifulSoup(html)
-    parent = soup.contents[0]
-    for p in parent.findAll("div", {"class": "section"}):
-        if u"container" in p[u"class"]:
-            pass
-        else:
-            pp = parent
-            i = pp.index(p)
-            pp.contents[i:i+1] = p.contents
-
     soup.contents[0:1] = soup.contents[0].contents
+
+    for p in soup.findAll("div", {"class": "section"}):
+        i = soup.index(p)
+        soup.contents[i:i+1] = p.contents
+
+
+    for p in soup.findAll("div", {u"class": u"system-message"},
+                          recursive=False):
+        i = soup.index(p)
+        soup.contents[i:i+1] = []
+
 
     html = unicode(soup) #.prettify()
     return html
